@@ -26,7 +26,6 @@ class RFIDReader(threading.Thread):
         while True:
             # Main loop waiting for RFID scan running in thread
             rfid_id, rfid_txt = self.reader.read()
-            print('scanned')
             self.process_rfid(rfid_id, rfid_txt.strip())
 
     def process_rfid(self, rfid_id, rfid_txt):
@@ -37,7 +36,19 @@ class RFIDReader(threading.Thread):
         if time_difference > TOGGLE_COOLDOWN :
             # system_output_log.write_to_log(f'RFID Scan Attempt! Key Name: {rfid_txt}')
             OLED.clear()
-            print(authenticate_key(RFID_ID, RFID_TXT))
+            scanned_key = authenticate_key(RFID_ID, RFID_TXT)
+            if scanned_key:
+                # open garage if key is valid
+                print("opening garage")
+                oled_thread = threading.Thread(target=display_scan_result, 
+                                               args=('Authenticated', f'Key: {scanned_key}'))
+            else:
+                # if key is invalid
+                oled_thread = threading.Thread(target=display_scan_result, 
+                                args=('UNAUTHORIZED', 'SYSTEM NOTIFIED'))
+            oled_thread.start()
+            oled_thread.join()
+
 
 
 class system_log:
@@ -71,21 +82,22 @@ def authenticate_key(rfid_key_num, rfid_key_name):
             # lprint(f"Authenticated User Toggled Garage! Key Name: {registered_key['NAME']}")
             # lprint(f"Transaction ID: {transaction_id}")
             # open_garage(key.hash, transaction_id)
+            return key.name
             OLED.text("Authenticated", (15, 0))
             OLED.text(f"Key: {key.name}", (0, 30))
             OLED.poll()
-            return key.name
+        
+        return False
+        # else:
 
-        else:
+        #     # lprint("Unauthorized tag attempt!")
 
-            # lprint("Unauthorized tag attempt!")
-
-            # if LOGGING:
-                # system_output_log.write_to_log(f"UNAUTHORIZED ATTEMPT TO TOGGLE GARAGE!")
-            OLED.text("UNAUTHORIZED", (10, 0))
-            OLED.text("SYSTEM NOTIFIED", (0, 30))
-            OLED.poll()
-            return False
+        #     # if LOGGING:
+        #         # system_output_log.write_to_log(f"UNAUTHORIZED ATTEMPT TO TOGGLE GARAGE!")
+        #     OLED.text("UNAUTHORIZED", (10, 0))
+        #     OLED.text("SYSTEM NOTIFIED", (0, 30))
+        #     OLED.poll()
+        #     return False
             # break
     # display_time()
 
@@ -95,10 +107,6 @@ def open_garage(identification, transaction_id):
     msg = f"{CMD}*{transaction_id}"
     sock.sendto(bytes(msg, 'utf-8'), (HOSTNAME_TARGET, UDP_PORT))
 
-def lprint(msg):
-    print(msg)
-    if LOGGING:
-        system_output_log.write_to_log(msg)
 
 def display_time():
     OLED.clear()
@@ -117,6 +125,11 @@ def time_of_day():
     current_time = time_obj(hour, minute, day_half)
 
     return current_time
+
+def display_scan_result(line1, line2):
+    OLED.text(line1, (15, 0))
+    OLED.text(line2, (0, 30))
+    OLED.poll()
 
 def display_time_check():
     prev_min = "x"
