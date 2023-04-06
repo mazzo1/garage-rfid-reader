@@ -15,34 +15,31 @@ from mfrc522 import SimpleMFRC522
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 OLED = oled()
 
-class rfid_reader(threading.Thread):
-
+class RFIDReader(threading.Thread):
+    """RFID Reader Object and Controller"""
     def run(self):
+        # Function that runs in separate thread
         self.reader = SimpleMFRC522()
         self.enabled = True
         self.last_scan = time()
 
         while True:
+            # Main loop waiting for RFID scan running in thread
             rfid_id, rfid_txt = self.reader.read()
             self.process_rfid(rfid_id, rfid_txt.strip())
 
     def process_rfid(self, rfid_id, rfid_txt):
-        cur_timestamp = time()
-        time_difference = cur_timestamp - self.last_scan
         RFID_ID = bytes(str(rfid_id), 'utf-8')
         RFID_TXT = bytes(rfid_txt, 'utf-8')
-
-        if time_difference > SCAN_COOLDOWN :
-            if LOGGING:
-                system_output_log.write_to_log(f'RFID Scan Attempt! Key Name: {rfid_txt}')
-
-            lprint(f"RFID scanned")
-
-            authenticate_key(RFID_ID, RFID_TXT)
+        cur_timestamp = time()
+        time_difference = cur_timestamp - self.last_scan
+        if time_difference > TOGGLE_COOLDOWN :
+            # system_output_log.write_to_log(f'RFID Scan Attempt! Key Name: {rfid_txt}')
+            OLED.clear()
+            print(authenticate_key(RFID_ID, RFID_TXT))
 
 
 class system_log:
-
     def __init__(self):
         try:
             os.mkdir("logs")
@@ -66,35 +63,30 @@ class system_log:
 
 
 def authenticate_key(rfid_key_num, rfid_key_name):
-    hashing = hashlib.sha256(rfid_key_name + rfid_key_num)
-    hash_test = hashing.hexdigest()
-    OLED.clear()
-    for registered_key in KEYS:
-        if registered_key['HASH_KEY'] == hash_test:
-
+    hashed_key = hashlib.sha256(rfid_key_name + rfid_key_num).hexdigest()
+    for key in KEYS:
+        if key.hash == hashed_key:
             transaction_id = secrets.token_hex(5)
-
-            lprint(f"Authenticated User Toggled Garage! Key Name: {registered_key['NAME']}")
-            lprint(f"Transaction ID: {transaction_id}")
-
-            open_garage(registered_key['HASH_KEY'], transaction_id)
-
+            # lprint(f"Authenticated User Toggled Garage! Key Name: {registered_key['NAME']}")
+            # lprint(f"Transaction ID: {transaction_id}")
+            # open_garage(key.hash, transaction_id)
             OLED.text("Authenticated", (15, 0))
-            OLED.text(f"Key: {registered_key['NAME']}", (0, 30))
+            OLED.text(f"Key: {key.name}", (0, 30))
             OLED.poll()
+            return key.name
 
-        elif hash_test not in [x['HASH_KEY'] for x in KEYS]:
+        else:
 
-            lprint("Unauthorized tag attempt!")
+            # lprint("Unauthorized tag attempt!")
 
-            if LOGGING:
-                system_output_log.write_to_log(f"UNAUTHORIZED ATTEMPT TO TOGGLE GARAGE!")
+            # if LOGGING:
+                # system_output_log.write_to_log(f"UNAUTHORIZED ATTEMPT TO TOGGLE GARAGE!")
             OLED.text("UNAUTHORIZED", (10, 0))
             OLED.text("SYSTEM NOTIFIED", (0, 30))
             OLED.poll()
-
-            break
-    display_time()
+            return False
+            # break
+    # display_time()
 
 def open_garage(identification, transaction_id):
     assert(identification)
@@ -135,16 +127,16 @@ def display_time_check():
         sleep(1)
 
 def main():
-    rfid_reader_obj = rfid_reader()
+    rfid_reader_obj = RFIDReader()
     rfid_reader_obj.start()
-    display_time_check()
+    # display_time_check()
 
 time_obj = namedtuple('time_object', 'hour minute day_half')
 
 if __name__ == "__main__":
     #oled_time_thread = threading.Thread(target=display_time_check, args='')
     #oled_time_thread.start()
-    if LOGGING:
-        system_output_log = system_log()
+    # if LOGGING:
+    #     system_output_log = system_log()
 
     main()
