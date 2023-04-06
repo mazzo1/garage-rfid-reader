@@ -26,6 +26,7 @@ class RFIDReader(threading.Thread):
         while True:
             # Main loop waiting for RFID scan running in thread
             rfid_id, rfid_txt = self.reader.read()
+            print('scanned')
             self.process_rfid(rfid_id, rfid_txt.strip())
 
     def process_rfid(self, rfid_id, rfid_txt):
