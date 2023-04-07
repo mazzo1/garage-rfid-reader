@@ -3,29 +3,18 @@ KeyEntry = namedtuple('KeyEntry',['name', 'hash'])
 # RFID Reader Configuration
 
 # MQTT BROKER SETTINGS 
-MQTT_BROKER_HOSTNAME = 'MQTT Broker Hostname Here'
+MQTT_BROKER_HOSTNAME = 'cash.local'
 MQTT_PORT = 1883
 MQTT_TIMEOUT = 60
 
 # CLIENT SETTINGS
-CLIENT_USERNAME = 'Username of this MQTT client'
-CLIENT_PW = 'Password of this MQTT client'
+CLIENT_USERNAME = 'garage-rfid-reader'
+CLIENT_PW = 'H7xc.shf&8'
 
 # Topics
-TOGGLE_DOOR_TOPIC = 'Topic where garage door messages are sent'
-CLIENT_STATUS_TOPIC = 'Topic for client status messages'
-LIGHT_A_TOPIC = 'Topic for Light A'
-LIGHT_B_TOPIC = 'Topic for Light B'
+CLIENT_STATUS_TOPIC = 'garage_reader/status'
 
-topics = [TOGGLE_DOOR_TOPIC, CLIENT_STATUS_TOPIC, LIGHT_A_TOPIC, LIGHT_B_TOPIC]
-
-## GPIO Pin Variables ##
-GARAGE_RELAY_PIN = 16
-LIGHT_A_RELAY_PIN = 1
-LIGHT_B_RELAY_PIN = 20
-GARAGE_STATUS_LED = 14
-LIGHTS_STATUS_LED = 27
-GARAGE_TOGGLE_LED = 17
+topics = [CLIENT_STATUS_TOPIC]
 
 # Cooldown time between toggling the garage door
 TOGGLE_COOLDOWN = 1.5
