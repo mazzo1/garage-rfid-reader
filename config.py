@@ -13,6 +13,7 @@ CLIENT_PW = 'H7xc.shf&8'
 
 # Topics
 CLIENT_STATUS_TOPIC = 'garage_reader/status'
+GARAGE_DOOR_TOPIC = 'garage_pi/door'
 
 topics = [CLIENT_STATUS_TOPIC]
 

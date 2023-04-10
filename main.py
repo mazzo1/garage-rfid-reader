@@ -37,7 +37,7 @@ class RFIDReader(threading.Thread):
             scanned_key = authenticate_key(RFID_ID, RFID_TXT)
             if scanned_key:
                 # open garage if key is valid
-                print("opening garage")
+                publish(GARAGE_DOOR_TOPIC, 'toggle')
                 oled_thread = threading.Thread(target=display_scan_result,
                                                args=('Authenticated', f'Key: {scanned_key}'))
             else:
