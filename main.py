@@ -79,7 +79,8 @@ def update_time(h, m, p):
 
 def get_time():
     """Return current Hour, Minute, and PM/AM as a list of 3"""
-    return datetime.now().strftime("%I:%M:%p").split(':')
+    h, m, p = datetime.now().strftime("%I:%M:%p").split(':')
+    return h, m, p
 
 
 def display_scan_result(line1, line2):
