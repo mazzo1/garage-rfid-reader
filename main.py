@@ -66,7 +66,7 @@ def check_time():
         h, m, p = get_time()
         if prev_min != m and OLED.busy == False:
             prev_min = m
-            update_time(h, m, p)
+            update_time((h, m, p))
         sleep(1)
 
 
