@@ -127,9 +127,9 @@ def on_connect_cb(client, userdata, flags, rc):
 def exit_handler():
     """Exit handler"""
     publish(CLIENT_STATUS_TOPIC, "died")
-    rfid_reader_obj.join()
-    update_clock_thread.join()
     mqtt_client.loop_stop()
+    update_clock_thread.join()
+    rfid_reader_obj.join()
 
 
 if __name__ == "__main__":
