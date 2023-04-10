@@ -70,7 +70,8 @@ def check_time():
         sleep(1)
 
 
-def update_time(h, m, p):
+def update_time(cur_time):
+    h, m, p = cur_time
     """Write supplied time input to OLED"""
     OLED.clear()
     OLED.text(f'{h}:{m} {p}', (28, 10))
@@ -79,8 +80,7 @@ def update_time(h, m, p):
 
 def get_time():
     """Return current Hour, Minute, and PM/AM as a list of 3"""
-    h, m, p = datetime.now().strftime("%I:%M:%p").split(':')
-    return h, m, p
+    return datetime.now().strftime("%I:%M:%p").split(':')
 
 
 def display_scan_result(line1, line2):
